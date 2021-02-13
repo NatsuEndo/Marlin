@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
  * FELIXprinters v2.0/3.0 (RAMPS v1.4) pin assignments
@@ -29,35 +28,36 @@
   #error "Felix 2.0+ supports up to 2 hotends / E-steppers. Comment out this line to continue."
 #endif
 
-#define BOARD_INFO_NAME "Felix 2.0+"
+#define BOARD_NAME "Felix 2.0+"
 
 //
 // Heaters / Fans
 //
 // Power outputs EFBF or EFBE
-#define MOSFET_D_PIN                          7
+#define MOSFET_D_PIN 7
 
 #include "pins_RAMPS.h"
 
 //
 // Misc. Functions
 //
-#define SDPOWER_PIN                           1
+#undef SDPOWER
+#define SDPOWER             1
 
-#define PS_ON_PIN                            12
+#define PS_ON_PIN          12
 
 //
 // LCD / Controller
 //
-#if BOTH(ULTRA_LCD, NEWPANEL)
+#if ENABLED(ULTRA_LCD) && ENABLED(NEWPANEL)
 
-  #define SD_DETECT_PIN                       6
+  #define SD_DETECT_PIN 6
 
 #endif // NEWPANEL && ULTRA_LCD
 
 //
 // M3/M4/M5 - Spindle/Laser Control
 //
-#undef SPINDLE_LASER_PWM_PIN                      // Definitions in pins_RAMPS.h are not valid with this board
-#undef SPINDLE_LASER_ENA_PIN
+#undef SPINDLE_LASER_PWM_PIN     // Definitions in pins_RAMPS.h are not valid with this board
+#undef SPINDLE_LASER_ENABLE_PIN
 #undef SPINDLE_DIR_PIN

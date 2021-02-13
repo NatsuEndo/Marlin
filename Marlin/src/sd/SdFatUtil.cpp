@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,45 +16,76 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
 /**
  * Arduino SdFat Library
- * Copyright (c) 2008 by William Greiman
+ * Copyright (C) 2008 by William Greiman
  *
  * This file is part of the Arduino Sd2Card Library
  */
-
-#include "../inc/MarlinConfig.h"
+#include "MarlinConfig.h"
 
 #if ENABLED(SDSUPPORT)
 
 #include "SdFatUtil.h"
-#include <string.h>
+#include "serial.h"
 
 /**
  * Amount of free RAM
  * \return The number of free bytes.
  */
 #ifdef __arm__
+extern "C" char* sbrk(int incr);
+int SdFatUtil::FreeRam() {
+  char top;
+  return &top - reinterpret_cast<char*>(sbrk(0));
+}
+#else  // __arm__
+extern char* __brkval;
+extern char __bss_end;
+/**
+ * Amount of free RAM
+ * \return The number of free bytes.
+ */
+int SdFatUtil::FreeRam() {
+  char top;
+  return __brkval ? &top - __brkval : &top - &__bss_end;
+}
+#endif  // __arm
 
-  extern "C" char* sbrk(int incr);
-  int SdFatUtil::FreeRam() {
-    char top;
-    return &top - reinterpret_cast<char*>(sbrk(0));
-  }
+/**
+ * %Print a string in flash memory.
+ *
+ * \param[in] pr Print object for output.
+ * \param[in] str Pointer to string stored in flash memory.
+ */
+void SdFatUtil::print_P(PGM_P str) {
+  for (uint8_t c; (c = pgm_read_byte(str)); str++) SERIAL_CHAR(c);
+}
 
-#else
+/**
+ * %Print a string in flash memory followed by a CR/LF.
+ *
+ * \param[in] pr Print object for output.
+ * \param[in] str Pointer to string stored in flash memory.
+ */
+void SdFatUtil::println_P(PGM_P str) { print_P(str); SERIAL_EOL(); }
 
-  extern char* __brkval;
-  extern char __bss_end;
-  int SdFatUtil::FreeRam() {
-    char top;
-    return __brkval ? &top - __brkval : &top - &__bss_end;
-  }
+/**
+ * %Print a string in flash memory to Serial.
+ *
+ * \param[in] str Pointer to string stored in flash memory.
+ */
+void SdFatUtil::SerialPrint_P(PGM_P str) { print_P(str); }
 
-#endif
+/**
+ * %Print a string in flash memory to Serial followed by a CR/LF.
+ *
+ * \param[in] str Pointer to string stored in flash memory.
+ */
+void SdFatUtil::SerialPrintln_P(PGM_P str) { println_P(str); }
 
 #endif // SDSUPPORT

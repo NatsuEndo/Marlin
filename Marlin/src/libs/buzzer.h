@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,113 +16,131 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
-#include "../inc/MarlinConfig.h"
+#ifndef __BUZZER_H__
+#define __BUZZER_H__
 
-#if USE_BEEPER
+#include "types.h"
+#include "fastio.h"
+#include "circularqueue.h"
+#include "temperature.h"
 
-  #include "circularqueue.h"
+#include "MarlinConfig.h"
 
-  #define TONE_QUEUE_LENGTH 4
+#define TONE_QUEUE_LENGTH 4
 
-  /**
-   * @brief Tone structure
-   * @details Simple abstraction of a tone based on a duration and a frequency.
-   */
-  struct tone_t {
-    uint16_t duration;
-    uint16_t frequency;
-  };
+/**
+ * @brief Tone structure
+ * @details Simple abstraction of a tone based on a duration and a frequency.
+ */
+struct tone_t {
+  uint16_t duration;
+  uint16_t frequency;
+};
 
-  /**
-   * @brief Buzzer class
-   */
-  class Buzzer {
-    public:
+/**
+ * @brief Buzzer class
+ */
+class Buzzer {
+  private:
+    struct state_t {
+      tone_t   tone;
+      uint32_t endtime;
+    } state;
 
-      typedef struct {
-        tone_t   tone;
-        uint32_t endtime;
-      } state_t;
+  protected:
+    CircularQueue<tone_t, TONE_QUEUE_LENGTH> buffer;
 
-    private:
-      static state_t state;
+    /**
+     * @brief Inverts the sate of a digital PIN
+     * @details This will invert the current state of an digital IO pin.
+     */
+    void invert() {
+      TOGGLE(BEEPER_PIN);
+    }
 
-    protected:
-      static CircularQueue<tone_t, TONE_QUEUE_LENGTH> buffer;
+    /**
+     * @brief Turn off a digital PIN
+     * @details Alias of digitalWrite(PIN, LOW) using FastIO
+     */
+    void off() {
+      WRITE(BEEPER_PIN, LOW);
+    }
 
-      /**
-       * @brief Inverts the sate of a digital PIN
-       * @details This will invert the current state of an digital IO pin.
-       */
-      FORCE_INLINE static void invert() { TOGGLE(BEEPER_PIN); }
+    /**
+     * @brief Turn on a digital PIN
+     * @details Alias of digitalWrite(PIN, HIGH) using FastIO
+     */
+    void on() {
+      WRITE(BEEPER_PIN, HIGH);
+    }
 
-      /**
-       * @brief Turn off a digital PIN
-       * @details Alias of digitalWrite(PIN, LOW) using FastIO
-       */
-      FORCE_INLINE static void off() { WRITE(BEEPER_PIN, LOW); }
+    /**
+     * @brief Resets the state of the class
+     * @details Brings the class state to a known one.
+     */
+    void reset() {
+      this->off();
+      this->state.endtime = 0;
+    }
 
-      /**
-       * @brief Turn on a digital PIN
-       * @details Alias of digitalWrite(PIN, HIGH) using FastIO
-       */
-      FORCE_INLINE static void on() { WRITE(BEEPER_PIN, HIGH); }
+  public:
+    /**
+     * @brief Class constructor
+     */
+    Buzzer() {
+      SET_OUTPUT(BEEPER_PIN);
+      this->reset();
+    }
 
-      /**
-       * @brief Resets the state of the class
-       * @details Brings the class state to a known one.
-       */
-      static inline void reset() {
-        off();
-        state.endtime = 0;
+    /**
+     * @brief Add a tone to the queue
+     * @details Adds a tone_t structure to the ring buffer, will block IO if the
+     *          queue is full waiting for one slot to get available.
+     *
+     * @param duration Duration of the tone in milliseconds
+     * @param frequency Frequency of the tone in hertz
+     */
+    void tone(const uint16_t &duration, const uint16_t &frequency=0) {
+      while (buffer.isFull()) {
+        this->tick();
+        thermalManager.manage_heater();
       }
+      tone_t tone = { duration, frequency };
+      this->buffer.enqueue(tone);
+    }
 
-    public:
-      /**
-       * @brief Init Buzzer
-       */
-      static inline void init() {
-        SET_OUTPUT(BEEPER_PIN);
-        reset();
+    /**
+     * @brief Loop function
+     * @details This function should be called at loop, it will take care of
+     *          playing the tones in the queue.
+     */
+    virtual void tick() {
+      const millis_t now = millis();
+
+      if (!this->state.endtime) {
+        if (this->buffer.isEmpty()) return;
+
+        this->state.tone = this->buffer.dequeue();
+        this->state.endtime = now + this->state.tone.duration;
+
+        if (this->state.tone.frequency > 0) {
+          #if ENABLED(SPEAKER)
+            CRITICAL_SECTION_START;
+            ::tone(BEEPER_PIN, this->state.tone.frequency, this->state.tone.duration);
+            CRITICAL_SECTION_END;
+          #else
+            this->on();
+          #endif
+        }
       }
+      else if (ELAPSED(now, this->state.endtime)) this->reset();
+    }
+};
 
-      /**
-       * @brief Add a tone to the queue
-       * @details Adds a tone_t structure to the ring buffer, will block IO if the
-       *          queue is full waiting for one slot to get available.
-       *
-       * @param duration Duration of the tone in milliseconds
-       * @param frequency Frequency of the tone in hertz
-       */
-      static void tone(const uint16_t duration, const uint16_t frequency=0);
-
-      /**
-       * @brief Tick function
-       * @details This function should be called at loop, it will take care of
-       *          playing the tones in the queue.
-       */
-      static void tick();
-  };
-
-  // Provide a buzzer instance
-  extern Buzzer buzzer;
-
-  // Buzz directly via the BEEPER pin tone queue
-  #define BUZZ(d,f) buzzer.tone(d, f)
-
-#elif HAS_BUZZER
-
-  // Buzz indirectly via the MarlinUI instance
-  #define BUZZ(d,f) ui.buzz(d,f)
-
-#else
-
-  // No buzz capability
-  #define BUZZ(d,f) NOOP
+extern Buzzer buzzer;
 
 #endif

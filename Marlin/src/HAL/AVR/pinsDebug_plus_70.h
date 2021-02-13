@@ -1,6 +1,10 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2017 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ *
+ * Based on Sprinter and grbl.
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,21 +17,26 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
- * Structures for 2560 family boards that use more than 70 pins
+ *  structurs for 2560 family boards that use morre than 70 pins
  */
 
-#if MB(BQ_ZUM_MEGA_3D, MINIRAMBO, SCOOVO_X9H, TRIGORILLA_14)
-  #undef NUM_DIGITAL_PINS
+#ifndef __PINSDEBUG_PLUS_70_H__
+#define __PINSDEBUG_PLUS_70_H__
+
+#undef NUM_DIGITAL_PINS
+#if MB(BQ_ZUM_MEGA_3D)
   #define NUM_DIGITAL_PINS            85
 #elif MB(MIGHTYBOARD_REVE)
-  #undef NUM_DIGITAL_PINS
   #define NUM_DIGITAL_PINS            80
+#elif MB(MINIRAMBO)
+  #define NUM_DIGITAL_PINS            85
+#elif MB(SCOOVO_X9H)
+  #define NUM_DIGITAL_PINS            85
 #endif
 
 #define PA 1
@@ -44,7 +53,7 @@
 
 const uint8_t PROGMEM digital_pin_to_port_PGM_plus_70[] = {
   // PORTLIST
-  // ------------------------
+  // -------------------------------------------
   PE  , // PE 0 ** 0 ** USART0_RX
   PE  , // PE 1 ** 1 ** USART0_TX
   PE  , // PE 4 ** 2 ** PWM2
@@ -137,7 +146,7 @@ const uint8_t PROGMEM digital_pin_to_port_PGM_plus_70[] = {
 
 const uint8_t PROGMEM digital_pin_to_bit_mask_PGM_plus_70[] = {
   // PIN IN PORT
-  // ------------------------
+  // -------------------------------------------
   _BV( 0 )  , // PE 0 ** 0 ** USART0_RX
   _BV( 1 )  , // PE 1 ** 1 ** USART0_TX
   _BV( 4 )  , // PE 4 ** 2 ** PWM2
@@ -231,7 +240,7 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM_plus_70[] = {
 
 const uint8_t PROGMEM digital_pin_to_timer_PGM_plus_70[] = {
   // TIMERS
-  // ------------------------
+  // -------------------------------------------
   NOT_ON_TIMER  , // PE 0 ** 0 ** USART0_RX
   NOT_ON_TIMER  , // PE 1 ** 1 ** USART0_TX
   TIMER3B , // PE 4 ** 2 ** PWM2
@@ -327,3 +336,6 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM_plus_70[] = {
  *  PCINT14 J5 76
  *  PCINT15 J6 77
  */
+
+
+#endif // __PINSDEBUG_PLUS_70_H__

@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
  * Velleman K8400 (Vertex)
@@ -32,16 +31,17 @@
  *  - Second heater has moved pin
  */
 
-#define BOARD_INFO_NAME         "K8400"
+#define BOARD_NAME              "K8400"
 #define DEFAULT_MACHINE_NAME    "Vertex"
+#define DEFAULT_SOURCE_CODE_URL "https://github.com/birkett/Vertex-K8400-Firmware"
 
 #include "pins_3DRAG.h"
 
 //
 // Limit Switches
 //
-#define X_STOP_PIN                            3
-#define Y_STOP_PIN                           14
+#define X_STOP_PIN  3
+#define Y_STOP_PIN 14
 
 #undef X_MIN_PIN
 #undef X_MAX_PIN
@@ -52,13 +52,13 @@
 // Steppers
 //
 #undef E1_STEP_PIN
-#define E1_STEP_PIN                          32
+#define E1_STEP_PIN   32
 
 //
 // Heaters / Fans
 //
 #undef HEATER_1_PIN
-#define HEATER_1_PIN                         11
+#define HEATER_1_PIN  11
 
 //
 // Misc. Functions
@@ -69,5 +69,5 @@
 
 #if Z_STEP_PIN == 26
   #undef Z_STEP_PIN
-  #define Z_STEP_PIN                         32
+  #define Z_STEP_PIN 32
 #endif

@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,24 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
-#define BOARD_INFO_NAME "MAKEboard Mini"
+#include "pins_RAMPS.h"
+
+#undef BOARD_NAME
+#define BOARD_NAME "MAKEBOARD_MINI"
 
 //
 // Only 3 Limit Switch plugs on Micromake C1
 //
+#undef X_MIN_PIN
+#undef Y_MIN_PIN
+#undef Z_MIN_PIN
+#undef X_MAX_PIN
+#undef Y_MAX_PIN
+#undef Z_MAX_PIN
 #define X_STOP_PIN          2
 #define Y_STOP_PIN         15
 #define Z_STOP_PIN         19
-
-#include "pins_RAMPS.h"

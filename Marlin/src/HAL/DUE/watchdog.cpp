@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,99 +16,53 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifdef ARDUINO_ARCH_SAM
 
-#include "../../inc/MarlinConfig.h"
-#include "../../MarlinCore.h"
-#include "watchdog.h"
-
-// Override Arduino runtime to either config or disable the watchdog
-//
-// We need to configure the watchdog as soon as possible in the boot
-// process, because watchdog initialization at hardware reset on SAM3X8E
-// is unreliable, and there is risk of unintended resets if we delay
-// that initialization to a later time.
-void watchdogSetup() {
-
-  #if ENABLED(USE_WATCHDOG)
-
-    // 4 seconds timeout
-    uint32_t timeout = 4000;
-
-    // Calculate timeout value in WDT counter ticks: This assumes
-    // the slow clock is running at 32.768 kHz watchdog
-    // frequency is therefore 32768 / 128 = 256 Hz
-    timeout = (timeout << 8) / 1000;
-    if (timeout == 0)
-      timeout = 1;
-    else if (timeout > 0xFFF)
-      timeout = 0xFFF;
-
-    // We want to enable the watchdog with the specified timeout
-    uint32_t value =
-      WDT_MR_WDV(timeout) |               // With the specified timeout
-      WDT_MR_WDD(timeout) |               // and no invalid write window
-    #if !(SAMV70 || SAMV71 || SAME70 || SAMS70)
-      WDT_MR_WDRPROC   |                  // WDT fault resets processor only - We want
-                                          // to keep PIO controller state
-    #endif
-      WDT_MR_WDDBGHLT  |                  // WDT stops in debug state.
-      WDT_MR_WDIDLEHLT;                   // WDT stops in idle state.
-
-    #if ENABLED(WATCHDOG_RESET_MANUAL)
-      // We enable the watchdog timer, but only for the interrupt.
-
-      // Configure WDT to only trigger an interrupt
-      value |= WDT_MR_WDFIEN;             // Enable WDT fault interrupt.
-
-      // Disable WDT interrupt (just in case, to avoid triggering it!)
-      NVIC_DisableIRQ(WDT_IRQn);
-
-      // We NEED memory barriers to ensure Interrupts are actually disabled!
-      // ( https://dzone.com/articles/nvic-disabling-interrupts-on-arm-cortex-m-and-the )
-      __DSB();
-      __ISB();
-
-      // Initialize WDT with the given parameters
-      WDT_Enable(WDT, value);
-
-      // Configure and enable WDT interrupt.
-      NVIC_ClearPendingIRQ(WDT_IRQn);
-      NVIC_SetPriority(WDT_IRQn, 0); // Use highest priority, so we detect all kinds of lockups
-      NVIC_EnableIRQ(WDT_IRQn);
-
-    #else
-
-      // a WDT fault triggers a reset
-      value |= WDT_MR_WDRSTEN;
-
-      // Initialize WDT with the given parameters
-      WDT_Enable(WDT, value);
-
-    #endif
-
-    // Reset the watchdog
-    WDT_Restart(WDT);
-
-  #else
-
-    // Make sure to completely disable the Watchdog
-    WDT_Disable(WDT);
-
-  #endif
-}
+#include "Marlin.h"
 
 #if ENABLED(USE_WATCHDOG)
-  // Initialize watchdog - On SAM3X, Watchdog was already configured
-  //  and enabled or disabled at startup, so no need to reconfigure it
-  //  here.
-  void watchdog_init() {
-    // Reset watchdog to start clean
-    WDT_Restart(WDT);
-  }
-#endif // USE_WATCHDOG
 
-#endif
+#include "watchdog.h"
+
+// Initialize watchdog with 8s timeout, if possible. Otherwise, make it 4s.
+void watchdog_init() {
+  #if ENABLED(WATCHDOG_DURATION_8S) && defined(WDTO_8S)
+    #define WDTO_NS WDTO_8S
+  #else
+    #define WDTO_NS WDTO_4S
+  #endif
+  #if ENABLED(WATCHDOG_RESET_MANUAL)
+    // We enable the watchdog timer, but only for the interrupt.
+    // Take care, as this requires the correct order of operation, with interrupts disabled.
+    // See the datasheet of any AVR chip for details.
+    wdt_reset();
+    cli();
+    _WD_CONTROL_REG = _BV(_WD_CHANGE_BIT) | _BV(WDE);
+    _WD_CONTROL_REG = _BV(WDIE) | (WDTO_NS & 0x07) | ((WDTO_NS & 0x08) << 2); // WDTO_NS directly does not work. bit 0-2 are consecutive in the register but the highest value bit is at bit 5
+                                                                              // So worked for up to WDTO_2S
+    sei();
+    wdt_reset();
+  #else
+    wdt_enable(WDTO_NS); // The function handles the upper bit correct.
+  #endif
+  //delay(10000); // test it!
+}
+
+//===========================================================================
+//=================================== ISR ===================================
+//===========================================================================
+
+// Watchdog timer interrupt, called if main program blocks >4sec and manual reset is enabled.
+#if ENABLED(WATCHDOG_RESET_MANUAL)
+  ISR(WDT_vect) {
+    sei();  // With the interrupt driven serial we need to allow interrupts.
+    SERIAL_ERROR_START();
+    SERIAL_ERRORLNPGM("Watchdog barked, please turn off the printer.");
+    kill(PSTR("ERR:Watchdog")); //kill blocks //up to 16 characters so it fits on a 16x2 display
+    while (1); //wait for user or serial reset
+  }
+#endif // WATCHDOG_RESET_MANUAL
+
+#endif // USE_WATCHDOG

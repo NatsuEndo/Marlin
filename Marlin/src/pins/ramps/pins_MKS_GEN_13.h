@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
  * Arduino Mega with RAMPS v1.4 adjusted pin assignments
@@ -34,22 +33,22 @@
   #error "MKS GEN 1.3/1.4 supports up to 2 hotends / E-steppers. Comment out this line to continue."
 #endif
 
-#define BOARD_INFO_NAME "MKS GEN >= v1.3"
+#define BOARD_NAME "MKS GEN >= v1.3"
 
 //
 // Heaters / Fans
 //
 // Power outputs EFBF or EFBE
-#define MOSFET_D_PIN                           7
+#define MOSFET_D_PIN 7
 
 //
 // PSU / SERVO
 //
-// If PSU_CONTROL is specified, always hijack Servo 3
+// If POWER_SUPPLY is specified, always hijack Servo 3
 //
-#if ENABLED(PSU_CONTROL)
-  #define SERVO3_PIN                          -1
-  #define PS_ON_PIN                            4
+#if POWER_SUPPLY > 0
+  #define SERVO3_PIN      -1
+  #define PS_ON_PIN        4
 #endif
 
 #include "pins_RAMPS.h"
@@ -57,7 +56,7 @@
 //
 // LCD / Controller
 //
-#if ANY(VIKI2, miniVIKI)
+#if ENABLED(VIKI2) || ENABLED(miniVIKI)
   /**
    * VIKI2 Has two groups of wires with...
    *
@@ -96,52 +95,50 @@
   #undef SD_DETECT_PIN
   #undef BEEPER_PIN
   #undef KILL_PIN
-  #undef STAT_LED_RED_PIN
-  #undef STAT_LED_BLUE_PIN
 
   //
   // VIKI2 12-wire lead
   //
 
-  // orange/white          SDCD
-  #define SD_DETECT_PIN                       49
+  // orange/white         SDCD
+  #define SD_DETECT_PIN   49
 
-  // white                 ENCA
-  #define BTN_EN1                             35
+  // white                ENCA
+  #define BTN_EN1         35
 
-  // green                 ENCB
-  #define BTN_EN2                             37
+  // green                ENCB
+  #define BTN_EN2         37
 
-  // purple                ENCBTN
-  #define BTN_ENC                             31
+  // purple               ENCBTN
+  #define BTN_ENC         31
 
-  // brown                 A0
-  #define DOGLCD_A0                           27
+  // brown                A0
+  #define DOGLCD_A0       27
 
-  // green/white           LCS
-  #define DOGLCD_CS                           29
+  // green/white          LCS
+  #define DOGLCD_CS       29
 
-                        // 50    gray   MISO
-                        // 51    yellow MOSI
-                        // 52    orange SCK
+                       // 50    gray   MISO
+                       // 51    yellow MOSI
+                       // 52    orange SCK
 
-  // blue                  SDCS
-  //#define SDSS                              53
+  // blue                 SDCS
+  //#define SDSS            53
 
   //
   // VIKI2 4-wire lead
   //
 
-  // blue                  BTN
-  #define KILL_PIN                            23
+  // blue                 BTN
+  #define KILL_PIN        23
 
-  // green                 BUZZER
-  #define BEEPER_PIN                          25
+  // green                BUZZER
+  #define BEEPER_PIN      25
 
-  // yellow                RED-LED
-  #define STAT_LED_RED_PIN                    16
+  // yellow               RED-LED
+  #define STAT_LED_RED_PIN 16
 
-  // white                 BLUE-LED
-  #define STAT_LED_BLUE_PIN                   17
+  // white                BLUE-LED
+  #define STAT_LED_BLUE_PIN 17
 
 #endif

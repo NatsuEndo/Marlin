@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,167 +16,169 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
- * MarlinSerial_Due.h - Hardware serial library for Arduino DUE
- * Copyright (c) 2017 Eduardo José Tagle. All right reserved
- * Based on MarlinSerial for AVR, copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+ * MarlinSerial.h - Hardware serial library for Wiring
+ * Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+ *
+ * Modified 28 September 2010 by Mark Sproul
+ * Modified 14 February 2016 by Andreas Hardtung (added tx buffer)
+ * Modified 01 October 2017 by Eduardo José Tagle (added XON/XOFF)
  */
 
-#include <WString.h>
+#ifndef _MARLINSERIAL_H_
+#define _MARLINSERIAL_H_
 
-#include "../../inc/MarlinConfigPre.h"
+#include "MarlinConfig.h"
+
+#ifndef SERIAL_PORT
+  #define SERIAL_PORT 0
+#endif
+
+// The presence of the UBRRH register is used to detect a UART.
+#define UART_PRESENT(port) ((port == 0 && (defined(UBRRH) || defined(UBRR0H))) || \
+                            (port == 1 && defined(UBRR1H)) || (port == 2 && defined(UBRR2H)) || \
+                            (port == 3 && defined(UBRR3H)))
+
+// These are macros to build serial port register names for the selected SERIAL_PORT (C preprocessor
+// requires two levels of indirection to expand macro values properly)
+#define SERIAL_REGNAME(registerbase,number,suffix) SERIAL_REGNAME_INTERNAL(registerbase,number,suffix)
+#if SERIAL_PORT == 0 && (!defined(UBRR0H) || !defined(UDR0)) // use un-numbered registers if necessary
+  #define SERIAL_REGNAME_INTERNAL(registerbase,number,suffix) registerbase##suffix
+#else
+  #define SERIAL_REGNAME_INTERNAL(registerbase,number,suffix) registerbase##number##suffix
+#endif
+
+// Registers used by MarlinSerial class (expanded depending on selected serial port)
+#define M_UCSRxA           SERIAL_REGNAME(UCSR,SERIAL_PORT,A) // defines M_UCSRxA to be UCSRnA where n is the serial port number
+#define M_UCSRxB           SERIAL_REGNAME(UCSR,SERIAL_PORT,B)
+#define M_RXENx            SERIAL_REGNAME(RXEN,SERIAL_PORT,)
+#define M_TXENx            SERIAL_REGNAME(TXEN,SERIAL_PORT,)
+#define M_TXCx             SERIAL_REGNAME(TXC,SERIAL_PORT,)
+#define M_RXCIEx           SERIAL_REGNAME(RXCIE,SERIAL_PORT,)
+#define M_UDREx            SERIAL_REGNAME(UDRE,SERIAL_PORT,)
+#define M_FEx              SERIAL_REGNAME(FE,SERIAL_PORT,)
+#define M_DORx             SERIAL_REGNAME(DOR,SERIAL_PORT,)
+#define M_UPEx             SERIAL_REGNAME(UPE,SERIAL_PORT,)
+#define M_UDRIEx           SERIAL_REGNAME(UDRIE,SERIAL_PORT,)
+#define M_UDRx             SERIAL_REGNAME(UDR,SERIAL_PORT,)
+#define M_UBRRxH           SERIAL_REGNAME(UBRR,SERIAL_PORT,H)
+#define M_UBRRxL           SERIAL_REGNAME(UBRR,SERIAL_PORT,L)
+#define M_RXCx             SERIAL_REGNAME(RXC,SERIAL_PORT,)
+#define M_USARTx_RX_vect   SERIAL_REGNAME(USART,SERIAL_PORT,_RX_vect)
+#define M_U2Xx             SERIAL_REGNAME(U2X,SERIAL_PORT,)
+#define M_USARTx_UDRE_vect SERIAL_REGNAME(USART,SERIAL_PORT,_UDRE_vect)
 
 #define DEC 10
 #define HEX 16
 #define OCT 8
 #define BIN 2
+#define BYTE 0
 
-// Define constants and variables for buffering incoming serial data.  We're
-// using a ring buffer (I think), in which rx_buffer_head is the index of the
-// location to which to write the next incoming character and rx_buffer_tail
-// is the index of the location from which to read.
-// 256 is the max limit due to uint8_t head and tail. Use only powers of 2. (...,16,32,64,128,256)
+// Define constants and variables for buffering serial data.
+// Use only 0 or powers of 2 greater than 1
+// : [0, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, ...]
 #ifndef RX_BUFFER_SIZE
   #define RX_BUFFER_SIZE 128
 #endif
+// 256 is the max TX buffer limit due to uint8_t head and tail.
 #ifndef TX_BUFFER_SIZE
   #define TX_BUFFER_SIZE 32
 #endif
 
-//#if ENABLED(SERIAL_XON_XOFF) && RX_BUFFER_SIZE < 1024
-//  #error "SERIAL_XON_XOFF requires RX_BUFFER_SIZE >= 1024 for reliable transfers without drops."
-//#elif RX_BUFFER_SIZE && (RX_BUFFER_SIZE < 2 || !IS_POWER_OF_2(RX_BUFFER_SIZE))
-//  #error "RX_BUFFER_SIZE must be a power of 2 greater than 1."
-//#elif TX_BUFFER_SIZE && (TX_BUFFER_SIZE < 2 || TX_BUFFER_SIZE > 256 || !IS_POWER_OF_2(TX_BUFFER_SIZE))
-//  #error "TX_BUFFER_SIZE must be 0, a power of 2 greater than 1, and no greater than 256."
-//#endif
+#if USE_MARLINSERIAL
 
-// Templated type selector
-template<bool b, typename T, typename F> struct TypeSelector { typedef T type;} ;
-template<typename T, typename F> struct TypeSelector<false, T, F> { typedef F type; };
+  #if RX_BUFFER_SIZE > 256
+    typedef uint16_t ring_buffer_pos_t;
+  #else
+    typedef uint8_t ring_buffer_pos_t;
+  #endif
 
-// Templated structure wrapper
-template<typename S, unsigned int addr> struct StructWrapper {
-  constexpr StructWrapper(int) {}
-  FORCE_INLINE S* operator->() const { return (S*)addr; }
-};
+  #if ENABLED(SERIAL_STATS_DROPPED_RX)
+    extern uint8_t rx_dropped_bytes;
+  #endif
 
-template<typename Cfg>
-class MarlinSerial {
-protected:
-  // Information for all supported UARTs
-  static constexpr uint32_t BASES[] = {0x400E0800U, 0x40098000U, 0x4009C000U, 0x400A0000U, 0x400A4000U};
-  static constexpr IRQn_Type IRQS[] = {  UART_IRQn, USART0_IRQn, USART1_IRQn, USART2_IRQn, USART3_IRQn};
-  static constexpr int    IRQ_IDS[] = {    ID_UART,   ID_USART0,   ID_USART1,   ID_USART2,   ID_USART3};
+  #if ENABLED(SERIAL_STATS_RX_BUFFER_OVERRUNS)
+    extern uint8_t rx_buffer_overruns;
+  #endif
 
-  // Alias for shorter code
-  static constexpr StructWrapper<Uart,BASES[Cfg::PORT]> HWUART = 0;
-  static constexpr IRQn_Type HWUART_IRQ = IRQS[Cfg::PORT];
-  static constexpr int HWUART_IRQ_ID = IRQ_IDS[Cfg::PORT];
+  #if ENABLED(SERIAL_STATS_RX_FRAMING_ERRORS)
+    extern uint8_t rx_framing_errors;
+  #endif
 
-  // Base size of type on buffer size
-  typedef typename TypeSelector<(Cfg::RX_SIZE>256), uint16_t, uint8_t>::type ring_buffer_pos_t;
+  #if ENABLED(SERIAL_STATS_MAX_RX_QUEUED)
+    extern ring_buffer_pos_t rx_max_enqueued;
+  #endif
 
-  struct ring_buffer_r {
-    volatile ring_buffer_pos_t head, tail;
-    unsigned char buffer[Cfg::RX_SIZE];
+  class MarlinSerial {
+
+    public:
+      MarlinSerial() {};
+      static void begin(const long);
+      static void end();
+      static int peek(void);
+      static int read(void);
+      static void flush(void);
+      static ring_buffer_pos_t available(void);
+      static void write(const uint8_t c);
+      static void flushTX(void);
+
+      #if ENABLED(SERIAL_STATS_DROPPED_RX)
+        FORCE_INLINE static uint32_t dropped() { return rx_dropped_bytes; }
+      #endif
+
+      #if ENABLED(SERIAL_STATS_RX_BUFFER_OVERRUNS)
+        FORCE_INLINE static uint32_t buffer_overruns() { return rx_buffer_overruns; }
+      #endif
+
+      #if ENABLED(SERIAL_STATS_RX_FRAMING_ERRORS)
+        FORCE_INLINE static uint32_t framing_errors() { return rx_framing_errors; }
+      #endif
+
+      #if ENABLED(SERIAL_STATS_MAX_RX_QUEUED)
+        FORCE_INLINE static ring_buffer_pos_t rxMaxEnqueued() { return rx_max_enqueued; }
+      #endif
+
+      FORCE_INLINE static void write(const char* str) { while (*str) write(*str++); }
+      FORCE_INLINE static void write(const uint8_t* buffer, size_t size) { while (size--) write(*buffer++); }
+      FORCE_INLINE static void print(const String& s) { for (int i = 0; i < (int)s.length(); i++) write(s[i]); }
+      FORCE_INLINE static void print(const char* str) { write(str); }
+
+      static void print(char, int = BYTE);
+      static void print(unsigned char, int = BYTE);
+      static void print(int, int = DEC);
+      static void print(unsigned int, int = DEC);
+      static void print(long, int = DEC);
+      static void print(unsigned long, int = DEC);
+      static void print(double, int = 2);
+
+      static void println(const String& s);
+      static void println(const char[]);
+      static void println(char, int = BYTE);
+      static void println(unsigned char, int = BYTE);
+      static void println(int, int = DEC);
+      static void println(unsigned int, int = DEC);
+      static void println(long, int = DEC);
+      static void println(unsigned long, int = DEC);
+      static void println(double, int = 2);
+      static void println(void);
+      operator bool() { return true; }
+
+    private:
+      static void printNumber(unsigned long, const uint8_t);
+      static void printFloat(double, uint8_t);
   };
 
-  struct ring_buffer_t {
-    volatile uint8_t head, tail;
-    unsigned char buffer[Cfg::TX_SIZE];
-  };
+  extern MarlinSerial customizedSerial;
 
-  static ring_buffer_r rx_buffer;
-  static ring_buffer_t tx_buffer;
-  static bool _written;
+#endif // USE_MARLINSERIAL
 
-  static constexpr uint8_t XON_XOFF_CHAR_SENT = 0x80,  // XON / XOFF Character was sent
-                           XON_XOFF_CHAR_MASK = 0x1F;  // XON / XOFF character to send
-
-  // XON / XOFF character definitions
-  static constexpr uint8_t XON_CHAR  = 17, XOFF_CHAR = 19;
-  static uint8_t xon_xoff_state,
-                 rx_dropped_bytes,
-                 rx_buffer_overruns,
-                 rx_framing_errors;
-  static ring_buffer_pos_t rx_max_enqueued;
-
-  FORCE_INLINE static void store_rxd_char();
-  FORCE_INLINE static void _tx_thr_empty_irq();
-  static void UART_ISR();
-
-public:
-  MarlinSerial() {};
-  static void begin(const long);
-  static void end();
-  static int peek();
-  static int read();
-  static void flush();
-  static ring_buffer_pos_t available();
-  static void write(const uint8_t c);
-  static void flushTX();
-
-  static inline bool emergency_parser_enabled() { return Cfg::EMERGENCYPARSER; }
-
-  FORCE_INLINE static uint8_t dropped() { return Cfg::DROPPED_RX ? rx_dropped_bytes : 0; }
-  FORCE_INLINE static uint8_t buffer_overruns() { return Cfg::RX_OVERRUNS ? rx_buffer_overruns : 0; }
-  FORCE_INLINE static uint8_t framing_errors() { return Cfg::RX_FRAMING_ERRORS ? rx_framing_errors : 0; }
-  FORCE_INLINE static ring_buffer_pos_t rxMaxEnqueued() { return Cfg::MAX_RX_QUEUED ? rx_max_enqueued : 0; }
-
-  FORCE_INLINE static void write(const char* str) { while (*str) write(*str++); }
-  FORCE_INLINE static void write(const uint8_t* buffer, size_t size) { while (size--) write(*buffer++); }
-  FORCE_INLINE static void print(const String& s) { for (int i = 0; i < (int)s.length(); i++) write(s[i]); }
-  FORCE_INLINE static void print(const char* str) { write(str); }
-
-  static void print(char, int = 0);
-  static void print(unsigned char, int = 0);
-  static void print(int, int = DEC);
-  static void print(unsigned int, int = DEC);
-  static void print(long, int = DEC);
-  static void print(unsigned long, int = DEC);
-  static void print(double, int = 2);
-
-  static void println(const String& s);
-  static void println(const char[]);
-  static void println(char, int = 0);
-  static void println(unsigned char, int = 0);
-  static void println(int, int = DEC);
-  static void println(unsigned int, int = DEC);
-  static void println(long, int = DEC);
-  static void println(unsigned long, int = DEC);
-  static void println(double, int = 2);
-  static void println();
-  operator bool() { return true; }
-
-private:
-  static void printNumber(unsigned long, const uint8_t);
-  static void printFloat(double, uint8_t);
-};
-
-// Serial port configuration
-template <uint8_t serial>
-struct MarlinSerialCfg {
-  static constexpr int PORT               = serial;
-  static constexpr unsigned int RX_SIZE   = RX_BUFFER_SIZE;
-  static constexpr unsigned int TX_SIZE   = TX_BUFFER_SIZE;
-  static constexpr bool XONOFF            = ENABLED(SERIAL_XON_XOFF);
-  static constexpr bool EMERGENCYPARSER   = ENABLED(EMERGENCY_PARSER);
-  static constexpr bool DROPPED_RX        = ENABLED(SERIAL_STATS_DROPPED_RX);
-  static constexpr bool RX_OVERRUNS       = ENABLED(SERIAL_STATS_RX_BUFFER_OVERRUNS);
-  static constexpr bool RX_FRAMING_ERRORS = ENABLED(SERIAL_STATS_RX_FRAMING_ERRORS);
-  static constexpr bool MAX_RX_QUEUED     = ENABLED(SERIAL_STATS_MAX_RX_QUEUED);
-};
-
-#if SERIAL_PORT >= 0
-  extern MarlinSerial<MarlinSerialCfg<SERIAL_PORT>> customizedSerial1;
+// Use the UART for Bluetooth in AT90USB configurations
+#if !USE_MARLINSERIAL && ENABLED(BLUETOOTH)
+  extern HardwareSerial bluetoothSerial;
 #endif
 
-#if defined(SERIAL_PORT_2) && SERIAL_PORT_2 >= 0
-  extern MarlinSerial<MarlinSerialCfg<SERIAL_PORT_2>> customizedSerial2;
-#endif
+#endif // _MARLINSERIAL_H_

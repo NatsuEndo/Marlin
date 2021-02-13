@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
  * Arduino Mega with RAMPS v1.4Plus, also known as 3DYMY version, pin assignments
@@ -35,16 +34,19 @@
  *  RAMPS_PLUS_EFF (Extruder, Fan, Fan)
  *  RAMPS_PLUS_EEF (Extruder, Extruder, Fan)
  *  RAMPS_PLUS_SF  (Spindle, Controller Fan)
+ *
  */
 
-#if NOT_TARGET(__AVR_ATmega1280__, __AVR_ATmega2560__)
- #error "Oops! Select 'Arduino/Genuino Mega or Mega 2560' in 'Tools > Board.'"
+#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
+ #error "Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu."
 #endif
 
-#define BOARD_INFO_NAME "RAMPS 1.4 Plus"
+#ifndef BOARD_NAME
+ #define BOARD_NAME "RAMPS 1.4 Plus"
+#endif
 
-#define RAMPS_D8_PIN                          10
-#define RAMPS_D10_PIN                          8
+#define RAMPS_D8_PIN  10
+#define RAMPS_D10_PIN  8
 
 #include "pins_RAMPS.h"
 
@@ -59,13 +61,13 @@
 #undef E1_DIR_PIN
 #undef E1_ENABLE_PIN
 
-#define E0_STEP_PIN                           36
-#define E0_DIR_PIN                            34
-#define E0_ENABLE_PIN                         30
+#define E0_STEP_PIN        36
+#define E0_DIR_PIN         34
+#define E0_ENABLE_PIN      30
 
-#define E1_STEP_PIN                           26
-#define E1_DIR_PIN                            28
-#define E1_ENABLE_PIN                         24
+#define E1_STEP_PIN        26
+#define E1_DIR_PIN         28
+#define E1_ENABLE_PIN      24
 
 #undef X_CS_PIN
 #undef Y_CS_PIN
@@ -73,13 +75,13 @@
 #undef E0_CS_PIN
 #undef E1_CS_PIN
 
-#if ENABLED(ULTRA_LCD) && NONE(REPRAPWORLD_GRAPHICAL_LCD, CR10_STOCKDISPLAY) && !BOTH(NEWPANEL, PANEL_ONE)
+#if ENABLED(ULTRA_LCD) && DISABLED(REPRAPWORLD_GRAPHICAL_LCD) && (DISABLED(NEWPANEL) || DISABLED(PANEL_ONE)) && DISABLED(CR10_STOCKDISPLAY)
   #if DISABLED(MKS_12864OLED) || ENABLED(MKS_12864OLED_SSD1306)
     #undef LCD_PINS_RS
-    #define LCD_PINS_RS                       42  // 3DYMY boards pin 16 -> 42
+    #define LCD_PINS_RS     42   // 3DYMY boards pin 16 -> 42
     #undef LCD_PINS_ENABLE
-    #define LCD_PINS_ENABLE                   44  // 3DYMY boards pin 17 -> 44
+    #define LCD_PINS_ENABLE 44   // 3DYMY boards pin 17 -> 44
   #endif
   #undef LCD_PINS_D7
-  #define LCD_PINS_D7                         53  // 3DYMY boards pin 29 -> 53
+  #define LCD_PINS_D7       53   // 3DYMY boards pin 29 -> 53
 #endif

@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
-#include "../core/macros.h"
+#ifndef TWIBUS_H
+#define TWIBUS_H
+
+#include "macros.h"
 
 #include <Wire.h>
 
@@ -30,6 +32,13 @@
 
 typedef void (*twiReceiveFunc_t)(int bytes);
 typedef void (*twiRequestFunc_t)();
+
+#if ENABLED(MECHADUINO_I2C_COMMANDS)
+  typedef union {
+    float fval;
+    byte bval[sizeof(float)];
+  } i2cFloat;
+#endif
 
 #define TWIBUS_BUFFER_SIZE 32
 
@@ -46,8 +55,9 @@ typedef void (*twiRequestFunc_t)();
  * for the host to interpret.
  *
  *  For more information see
- *    - https://marlinfw.org/docs/gcode/M260.html
- *    - https://marlinfw.org/docs/gcode/M261.html
+ *    - http://marlinfw.org/docs/gcode/M260.html
+ *    - http://marlinfw.org/docs/gcode/M261.html
+ *
  */
 class TWIBus {
   private:
@@ -61,7 +71,7 @@ class TWIBus {
      * @brief Internal buffer
      * @details A fixed buffer. TWI commands can be no longer than this.
      */
-    uint8_t buffer[TWIBUS_BUFFER_SIZE];
+    char buffer[TWIBUS_BUFFER_SIZE];
 
 
   public:
@@ -96,7 +106,7 @@ class TWIBus {
      *
      * @param c a data byte
      */
-    void addbyte(const char c);
+    void addbyte(const byte c);
 
     /**
      * @brief Add some bytes to the buffer
@@ -106,7 +116,7 @@ class TWIBus {
      * @param src source data address
      * @param bytes the number of bytes to add
      */
-    void addbytes(char src[], uint8_t bytes);
+    void addbytes(byte src[], uint8_t bytes);
 
     /**
      * @brief Add a null-terminated string to the buffer
@@ -169,7 +179,7 @@ class TWIBus {
      * @param bytes the number of bytes to request
      * @return the number of bytes captured to the buffer
      */
-    uint8_t capture(char *dst, const uint8_t bytes);
+    uint8_t capture(byte *dst, const uint8_t bytes);
 
     /**
      * @brief Flush the i2c bus.
@@ -216,12 +226,13 @@ class TWIBus {
        * @details Send the buffer and clear it.
        *          If a string is passed, write it into the buffer first.
        */
-      void reply(char str[]=nullptr);
-      inline void reply(const char str[]) { reply((char*)str); }
+      void reply(char str[]=NULL);
+      inline void reply(const char str[]) { this->reply((char*)str); }
 
     #endif
 
     #if ENABLED(DEBUG_TWIBUS)
+
       /**
        * @brief Prints a debug message
        * @details Prints a simple debug message "TWIBus::function: value"
@@ -231,10 +242,8 @@ class TWIBus {
       static void debug(const char func[], char c);
       static void debug(const char func[], char adr[]);
       static inline void debug(const char func[], uint8_t v) { debug(func, (uint32_t)v); }
-    #else
-      static inline void debug(const char[], uint32_t) {}
-      static inline void debug(const char[], char) {}
-      static inline void debug(const char[], char[]) {}
-      static inline void debug(const char[], uint8_t) {}
+
     #endif
 };
+
+#endif // TWIBUS_H

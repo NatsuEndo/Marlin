@@ -1,9 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
 
 /**
  * Open Motion controller with enable based extruders (Alpha!)
  *
- *                        ATmega644
+ *                        ATMega644
  *
  *                        +---\/---+
  *            (D 0) PB0  1|        |40  PA0 (AI 0 / D31)
@@ -48,12 +47,14 @@
  *       PWM (D 13) PD5 19|        |22  PC0 (D 16) SCL
  *       PWM (D 14) PD6 20|        |21  PD7 (D 15) PWM
  *                        +--------+
+ *
  */
 
 /**
  * Rev B    26 DEC 2016
  *
  * added pointer to a current Arduino IDE extension
+ *
  */
 
 /**
@@ -71,65 +72,66 @@
  * Just use the above JSON URL instead of Sparkfun's JSON.
  *
  * Once installed select the Sanguino board and then select the CPU.
+ *
  */
 
-#if NOT_TARGET(__AVR_ATmega644__)
-  #error "Oops! Select 'Sanguino' in 'Tools > Board' and ATmega644 in 'Tools > Processor.'"
+#ifndef __AVR_ATmega644__
+  #error "Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu."
 #endif
 
-#define BOARD_INFO_NAME "Alpha OMCA"
+#define BOARD_NAME         "Alpha OMCA"
 
 //
 // Limit Switches
 //
-#define X_STOP_PIN                             0
-#define Y_STOP_PIN                             1
-#define Z_STOP_PIN                             2
+#define X_STOP_PIN          0
+#define Y_STOP_PIN          1
+#define Z_STOP_PIN          2
 
 //
 // Steppers
 //
-#define X_STEP_PIN                            21
-#define X_DIR_PIN                             20
-#define X_ENABLE_PIN                          24
+#define X_STEP_PIN         21
+#define X_DIR_PIN          20
+#define X_ENABLE_PIN       24
 
-#define Y_STEP_PIN                            23
-#define Y_DIR_PIN                             22
-#define Y_ENABLE_PIN                          24
+#define Y_STEP_PIN         23
+#define Y_DIR_PIN          22
+#define Y_ENABLE_PIN       24
 
-#define Z_STEP_PIN                            26
-#define Z_DIR_PIN                             25
-#define Z_ENABLE_PIN                          24
+#define Z_STEP_PIN         26
+#define Z_DIR_PIN          25
+#define Z_ENABLE_PIN       24
 
-#define E0_STEP_PIN                           28
-#define E0_DIR_PIN                            27
-#define E0_ENABLE_PIN                         24
+#define E0_STEP_PIN        28
+#define E0_DIR_PIN         27
+#define E0_ENABLE_PIN      24
 
-#define E1_STEP_PIN                           -1  // 19
-#define E1_DIR_PIN                            -1  // 18
-#define E1_ENABLE_PIN                         24
+#define E1_STEP_PIN        -1   // 19
+#define E1_DIR_PIN         -1   // 18
+#define E1_ENABLE_PIN      24
 
-#define E2_STEP_PIN                           -1  // 17
-#define E2_DIR_PIN                            -1  // 16
-#define E2_ENABLE_PIN                         24
+#define E2_STEP_PIN        -1   // 17
+#define E2_DIR_PIN         -1   // 16
+#define E2_ENABLE_PIN      24
 
 //
 // Temperature Sensors
 //
-#define TEMP_0_PIN                             0  // Analog Input (D27)
+#define TEMP_0_PIN          0   // Analog Input (D27)
 
 //
 // Heaters / Fans
 //
-#define HEATER_0_PIN                           4
+#define HEATER_0_PIN        4
 
 #ifndef FAN_PIN
-  #define FAN_PIN                              3
+  #define FAN_PIN           3
 #endif
 
 //
 // Misc. Functions
 //
-#define SDSS                                  11
+#define SDSS               11
 
 /*  Unused (1) (2) (3) 4 5 6 7 8 9 10 11 12 13 (14) (15) (16) 17 (18) (19) (20) (21) (22) (23) 24 (25) (26) (27) 28 (29) (30) (31)  */
