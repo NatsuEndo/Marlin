@@ -48,7 +48,7 @@
  *
  * Set this value to 0 to fail on the first error to occur.
  */
-#define THERMOCOUPLE_MAX_ERRORS 15
+//#define THERMOCOUPLE_MAX_ERRORS 15
 
 //
 // Custom Thermistor 1000 parameters
@@ -192,12 +192,12 @@
  * THERMAL_PROTECTION_HYSTERESIS and/or THERMAL_PROTECTION_PERIOD
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-  #define THERMAL_PROTECTION_PERIOD 40        // Seconds
-  #define THERMAL_PROTECTION_HYSTERESIS 4     // Degrees Celsius
+  #define THERMAL_PROTECTION_PERIOD      1000     // Seconds
+  #define THERMAL_PROTECTION_HYSTERESIS     6     // Degrees Celsius
 
-  //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
+  //#define ADAPTIVE_FAN_SLOWING                  // Slow part cooling fan if temperature drops
   #if BOTH(ADAPTIVE_FAN_SLOWING, PIDTEMP)
-    //#define NO_FAN_SLOWING_IN_PID_TUNING    // Don't slow fan speed during M303
+    //#define NO_FAN_SLOWING_IN_PID_TUNING        // Don't slow fan speed during M303
   #endif
 
   /**
@@ -212,7 +212,7 @@
    * and/or decrease WATCH_TEMP_INCREASE. WATCH_TEMP_INCREASE should not be set
    * below 2.
    */
-  #define WATCH_TEMP_PERIOD  20               // Seconds
+  #define WATCH_TEMP_PERIOD   500             // Seconds
   #define WATCH_TEMP_INCREASE 2               // Degrees Celsius
 #endif
 
@@ -220,14 +220,14 @@
  * Thermal Protection parameters for the bed are just as above for hotends.
  */
 #if ENABLED(THERMAL_PROTECTION_BED)
-  #define THERMAL_PROTECTION_BED_PERIOD        20 // Seconds
-  #define THERMAL_PROTECTION_BED_HYSTERESIS     2 // Degrees Celsius
+  #define THERMAL_PROTECTION_BED_PERIOD        500 // Seconds
+  #define THERMAL_PROTECTION_BED_HYSTERESIS      6 // Degrees Celsius
 
   /**
    * As described above, except for the bed (M140/M190/M303).
    */
-  #define WATCH_BED_TEMP_PERIOD                60 // Seconds
-  #define WATCH_BED_TEMP_INCREASE               2 // Degrees Celsius
+  #define WATCH_BED_TEMP_PERIOD                500 // Seconds
+  #define WATCH_BED_TEMP_INCREASE                2 // Degrees Celsius
 #endif
 
 /**
@@ -480,20 +480,20 @@
  * Multiple extruders can be assigned to the same pin in which case
  * the fan will turn on when any selected extruder is above the threshold.
  */
-#define E0_AUTO_FAN_PIN -1
+#define E0_AUTO_FAN_PIN  7
 #define E1_AUTO_FAN_PIN -1
 #define E2_AUTO_FAN_PIN -1
 #define E3_AUTO_FAN_PIN -1
 #define E4_AUTO_FAN_PIN -1
-#define E5_AUTO_FAN_PIN -1
-#define E6_AUTO_FAN_PIN -1
-#define E7_AUTO_FAN_PIN -1
+//#define E5_AUTO_FAN_PIN -1
+//#define E6_AUTO_FAN_PIN -1
+//#define E7_AUTO_FAN_PIN -1
 #define CHAMBER_AUTO_FAN_PIN -1
 
-#define EXTRUDER_AUTO_FAN_TEMPERATURE 50
+#define EXTRUDER_AUTO_FAN_TEMPERATURE 45
 #define EXTRUDER_AUTO_FAN_SPEED 255   // 255 == full speed
-#define CHAMBER_AUTO_FAN_TEMPERATURE 30
-#define CHAMBER_AUTO_FAN_SPEED 255
+//#define CHAMBER_AUTO_FAN_TEMPERATURE 30
+//#define CHAMBER_AUTO_FAN_SPEED 255
 
 /**
  * Part-Cooling Fan Multiplexer
@@ -1076,8 +1076,8 @@
 // Change values more rapidly when the encoder is rotated faster
 #define ENCODER_RATE_MULTIPLIER
 #if ENABLED(ENCODER_RATE_MULTIPLIER)
-  #define ENCODER_10X_STEPS_PER_SEC   30  // (steps/s) Encoder rate for 10x speed
-  #define ENCODER_100X_STEPS_PER_SEC  80  // (steps/s) Encoder rate for 100x speed
+  #define ENCODER_10X_STEPS_PER_SEC   75  // (steps/s) Encoder rate for 10x speed
+  #define ENCODER_100X_STEPS_PER_SEC  160  // (steps/s) Encoder rate for 100x speed
 #endif
 
 // Play a beep when the feedrate is changed from the Status Screen
@@ -1213,23 +1213,23 @@
 
   //#define GCODE_REPEAT_MARKERS            // Enable G-code M808 to set repeat markers and do looping
 
-  #define SD_PROCEDURE_DEPTH 1              // Increase if you need more nested M32 calls
+  //#define SD_PROCEDURE_DEPTH 1              // Increase if you need more nested M32 calls
 
-  #define SD_FINISHED_STEPPERRELEASE true   // Disable steppers when SD Print is finished
-  #define SD_FINISHED_RELEASECOMMAND "M84"  // Use "M84XYE" to keep Z enabled so your bed stays in place
+  #define SD_FINISHED_STEPPERRELEASE true           // Disable steppers when SD Print is finished
+  #define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E"  // Use "M84XYE" to keep Z enabled so your bed stays in place
 
   // Reverse SD sort to show "more recent" files first, according to the card's FAT.
   // Since the FAT gets out of order with usage, SDCARD_SORT_ALPHA is recommended.
   #define SDCARD_RATHERRECENTFIRST
 
-  #define SD_MENU_CONFIRM_START             // Confirm the selected SD file before printing
+  //#define SD_MENU_CONFIRM_START             // Confirm the selected SD file before printing
 
   //#define NO_SD_AUTOSTART                 // Remove auto#.g file support completely to save some Flash, SRAM
   //#define MENU_ADDAUTOSTART               // Add a menu option to run auto#.g files
 
   //#define BROWSE_MEDIA_ON_INSERT          // Open the file browser when media is inserted
 
-  #define EVENT_GCODE_SD_ABORT "G28XY"      // G-code to run on SD Abort Print (e.g., "G28XY" or "G27")
+  //#define EVENT_GCODE_SD_ABORT "G28XY"      // G-code to run on SD Abort Print (e.g., "G28XY" or "G27")
 
   #if ENABLED(PRINTER_EVENT_LEDS)
     #define PE_LEDS_COMPLETED_TIME  (30*60) // (seconds) Time to keep the LED "done" color before restoring normal illumination
@@ -1675,7 +1675,7 @@
  *
  * Warning: Does not respect endstops!
  */
-//#define BABYSTEPPING
+#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
   //#define INTEGRATED_BABYSTEPPING         // EXPERIMENTAL integration of babystepping into the Stepper ISR
   //#define BABYSTEP_WITHOUT_HOMING
@@ -1686,7 +1686,7 @@
   #define BABYSTEP_MULTIPLICATOR_Z  1       // (steps or mm) Steps or millimeter distance for each Z babystep
   #define BABYSTEP_MULTIPLICATOR_XY 1       // (steps or mm) Steps or millimeter distance for each XY babystep
 
-  //#define DOUBLECLICK_FOR_Z_BABYSTEPPING  // Double-click on the Status Screen for Z Babystepping.
+  #define DOUBLECLICK_FOR_Z_BABYSTEPPING  // Double-click on the Status Screen for Z Babystepping.
   #if ENABLED(DOUBLECLICK_FOR_Z_BABYSTEPPING)
     #define DOUBLECLICK_MAX_INTERVAL 1250   // Maximum interval between clicks, in milliseconds.
                                             // Note: Extra time may be added to mitigate controller latency.
@@ -1722,10 +1722,10 @@
  *
  * See https://marlinfw.org/docs/features/lin_advance.html for full instructions.
  */
-//#define LIN_ADVANCE
+#define LIN_ADVANCE
 #if ENABLED(LIN_ADVANCE)
   //#define EXTRA_LIN_ADVANCE_K // Enable for second linear advance constants
-  #define LIN_ADVANCE_K 0.22    // Unit: mm compression per 1mm/s extruder speed
+  #define LIN_ADVANCE_K 0    // Unit: mm compression per 1mm/s extruder speed
   //#define LA_DEBUG            // If enabled, this will generate debug information output over USB.
   //#define EXPERIMENTAL_SCURVE // Enable this option to permit S-Curve Acceleration
 #endif
@@ -1871,7 +1871,7 @@
 #if ENABLED(ARC_SUPPORT)
   #define MM_PER_ARC_SEGMENT      1 // (mm) Length (or minimum length) of each arc segment
   //#define ARC_SEGMENTS_PER_R    1 // Max segment length, MM_PER = Min
-  #define MIN_ARC_SEGMENTS       24 // Minimum number of segments in a complete circle
+  //#define MIN_ARC_SEGMENTS       24 // Minimum number of segments in a complete circle
   //#define ARC_SEGMENTS_PER_SEC 50 // Use feedrate to choose segment length (with MM_PER_ARC_SEGMENT as the minimum)
   #define N_ARC_CORRECTION       25 // Number of interpolated segments between corrections
   //#define ARC_P_CIRCLES           // Enable the 'P' parameter to specify complete circles
@@ -2020,7 +2020,7 @@
  * Currently handles M108, M112, M410, M876
  * NOTE: Not yet implemented for all platforms.
  */
-//#define EMERGENCY_PARSER
+#define EMERGENCY_PARSER
 
 // Bad Serial-connections can miss a received command by sending an 'ok'
 // Therefore some clients abort after 30 seconds in a timeout.
@@ -2033,7 +2033,7 @@
 
 // Printrun may have trouble receiving long strings all at once.
 // This option inserts short delays between lines of serial output.
-#define SERIAL_OVERRUN_PROTECTION
+//#define SERIAL_OVERRUN_PROTECTION
 
 // For serial echo, the number of digits after the decimal point
 //#define SERIAL_FLOAT_PRECISION 4
@@ -2163,7 +2163,7 @@
  * Requires NOZZLE_PARK_FEATURE.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
-//#define ADVANCED_PAUSE_FEATURE
+#define ADVANCED_PAUSE_FEATURE
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
   #define PAUSE_PARK_RETRACT_FEEDRATE         60  // (mm/s) Initial retract feedrate.
   #define PAUSE_PARK_RETRACT_LENGTH            2  // (mm) Initial retract.
@@ -2188,7 +2188,7 @@
                                                   //   Set to 0 for manual extrusion.
                                                   //   Filament can be extruded repeatedly from the Filament Change menu
                                                   //   until extrusion is consistent, and to purge old filament.
-  #define ADVANCED_PAUSE_RESUME_PRIME          0  // (mm) Extra distance to prime nozzle after returning from park.
+  //#define ADVANCED_PAUSE_RESUME_PRIME          0  // (mm) Extra distance to prime nozzle after returning from park.
   //#define ADVANCED_PAUSE_FANS_PAUSE             // Turn off print-cooling fans while the machine is paused.
 
                                                   // Filament Unload does a Retract, Delay, and Purge first:
@@ -2201,7 +2201,7 @@
   #define FILAMENT_CHANGE_ALERT_BEEPS         10  // Number of alert beeps to play when a response is needed.
   #define PAUSE_PARK_NO_STEPPER_TIMEOUT           // Enable for XYZ steppers to stay powered on during filament change.
 
-  //#define PARK_HEAD_ON_PAUSE                    // Park the nozzle during pause and filament change.
+  #define PARK_HEAD_ON_PAUSE                    // Park the nozzle during pause and filament change.
   //#define HOME_BEFORE_FILAMENT_CHANGE           // If needed, home before parking for filament change
 
   //#define FILAMENT_LOAD_UNLOAD_GCODES           // Add M701/M702 Load/Unload G-codes, plus Load/Unload in the LCD Prepare menu.
@@ -2615,7 +2615,7 @@
    * STEALTHCHOP_(XY|Z|E) must be enabled to use HYBRID_THRESHOLD.
    * M913 X/Y/Z/E to live tune the setting
    */
-  //#define HYBRID_THRESHOLD
+  #define HYBRID_THRESHOLD
 
   #define X_HYBRID_THRESHOLD     100  // [mm/s]
   #define X2_HYBRID_THRESHOLD    100
@@ -2630,9 +2630,9 @@
   #define E2_HYBRID_THRESHOLD     30
   #define E3_HYBRID_THRESHOLD     30
   #define E4_HYBRID_THRESHOLD     30
-  #define E5_HYBRID_THRESHOLD     30
-  #define E6_HYBRID_THRESHOLD     30
-  #define E7_HYBRID_THRESHOLD     30
+  //#define E5_HYBRID_THRESHOLD     30
+  //#define E6_HYBRID_THRESHOLD     30
+  //#define E7_HYBRID_THRESHOLD     30
 
   /**
    * Use StallGuard to home / probe X, Y, Z.
@@ -2664,10 +2664,10 @@
   #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
     // TMC2209: 0...255. TMC2130: -64...63
     #define X_STALL_SENSITIVITY  8
-    #define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
+    //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
     #define Y_STALL_SENSITIVITY  8
-    #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
-    //#define Z_STALL_SENSITIVITY  8
+    //#define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
+    #define Z_STALL_SENSITIVITY  8
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
