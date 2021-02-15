@@ -1505,15 +1505,15 @@
 #define Z_SAFE_HOMING     // Not active in flying bear config
 
 #if ENABLED(Z_SAFE_HOMING)
-  #define Z_SAFE_HOMING_X_POINT X_CENTER  // X point for Z homing
-  #define Z_SAFE_HOMING_Y_POINT Y_CENTER  // Y point for Z homing
+#define Z_SAFE_HOMING_X_POINT X_CENTER // X point for Z homing
+#define Z_SAFE_HOMING_Y_POINT Y_CENTER // Y point for Z homing
 #endif
 
 // Homing speeds (mm/min)
 #define HOMING_FEEDRATE_MM_M { (50*60), (50*60), (8*60) }
 
 // Validate that endstops are triggered on homing moves
-#define VALIDATE_HOMING_ENDSTOPS
+//#define VALIDATE_HOMING_ENDSTOPS
 
 // @section calibrate
 
