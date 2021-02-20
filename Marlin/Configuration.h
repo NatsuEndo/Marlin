@@ -736,7 +736,7 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 40.12, 39.76, 207.18, 94 }     // { 40, 40, 125, 94 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 40.12, 39.76, 207.18, 52.079 }     // { 40, 40, 125, 94 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -1145,10 +1145,10 @@
 //#define HOME_AFTER_DEACTIVATE   // Require rehoming after steppers are deactivated. Also enable NO_MOTION_BEFORE_HOMING for extra safety.
 //#define UNKNOWN_Z_NO_RAISE      // Don't raise Z (lower the bed) if Z is "unknown." For beds that fall when Z is powered off.
 
-#define Z_HOMING_HEIGHT  5      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
+#define Z_HOMING_HEIGHT  3      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
-#define Z_AFTER_HOMING  5      // (mm) Height to move to after homing Z
+#define Z_AFTER_HOMING  3      // (mm) Height to move to after homing Z
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
@@ -1505,8 +1505,8 @@
 #define Z_SAFE_HOMING     // Not active in flying bear config
 
 #if ENABLED(Z_SAFE_HOMING)
-#define Z_SAFE_HOMING_X_POINT X_CENTER // X point for Z homing
-#define Z_SAFE_HOMING_Y_POINT Y_CENTER // Y point for Z homing
+#define Z_SAFE_HOMING_X_POINT 0 // X point for Z homing
+#define Z_SAFE_HOMING_Y_POINT 0 // Y point for Z homing
 #endif
 
 // Homing speeds (mm/min)
@@ -1589,7 +1589,7 @@
  */
 #define EEPROM_SETTINGS               // Persistent storage with M500 and M501
 //#define DISABLE_M503                // Saves ~2700 bytes of PROGMEM. Disable for release!
-#define EEPROM_CHITCHAT               // Give feedback on EEPROM commands. Disable to save PROGMEM.
+//#define EEPROM_CHITCHAT               // Give feedback on EEPROM commands. Disable to save PROGMEM.
 //#define EEPROM_BOOT_SILENT          // Keep M503 quiet and only give errors during first load
 #if ENABLED(EEPROM_SETTINGS)
   //#define EEPROM_AUTO_INIT          // Init EEPROM automatically on any errors.
@@ -1645,10 +1645,10 @@
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
   // Specify a park position as { X, Y, Z_raise }
-  #define NOZZLE_PARK_POINT { (X_MIN_POS + 10), (Y_MAX_POS - 10), 20 }    //{ (-2), (7), 10 }
+  #define NOZZLE_PARK_POINT { (X_MIN_POS + 1), (Y_MIN_POS + 1), 10 }    //{ (-2), (7), 10 }
   //#define NOZZLE_PARK_X_ONLY          // X move only is required to park
   //#define NOZZLE_PARK_Y_ONLY          // Y move only is required to park
-  #define NOZZLE_PARK_Z_RAISE_MIN   2   // (mm) Always raise Z by at least this distance
+  #define NOZZLE_PARK_Z_RAISE_MIN   10   // (mm) Always raise Z by at least this distance
   #define NOZZLE_PARK_XY_FEEDRATE 100   // (mm/s) X and Y axes feedrate (also used for delta Z axis)
   #define NOZZLE_PARK_Z_FEEDRATE    5   // (mm/s) Z axis feedrate (not used for delta printers)
 #endif
@@ -1849,7 +1849,7 @@
  * SD Card support is disabled by default. If your controller has an SD slot,
  * you must uncomment the following option or it won't work.
  */
-#define SDSUPPORT
+//#define SDSUPPORT
 
 /**
  * SD CARD: ENABLE CRC
