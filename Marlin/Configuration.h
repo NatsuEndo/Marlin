@@ -736,7 +736,7 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 40.12, 39.76, 207.18, 52.079 }     // { 40, 40, 125, 94 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 157.51, 160.32, 808.87, 208.70 }     // { 40.12, 39.76, 207.18, 52.079 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -989,7 +989,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -46, -11, 0 }
+#define NOZZLE_TO_PROBE_OFFSET { 0, 0, 0 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -999,10 +999,10 @@
 #define XY_PROBE_SPEED (133*60)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
-#define Z_PROBE_SPEED_FAST (8*60)
+#define Z_PROBE_SPEED_FAST (2*60)
 
 // Feedrate (mm/min) for the "accurate" probe of each point
-#define Z_PROBE_SPEED_SLOW (Z_PROBE_SPEED_FAST / 4)
+#define Z_PROBE_SPEED_SLOW (Z_PROBE_SPEED_FAST / 2)
 
 /**
  * Probe Activation Switch
@@ -1132,9 +1132,9 @@
 // For direct drive extruder v9 set to true, for geared extruder set to false.
 #define INVERT_E0_DIR false
 #define INVERT_E1_DIR true
-#define INVERT_E2_DIR false
-#define INVERT_E3_DIR false
-#define INVERT_E4_DIR false
+//#define INVERT_E2_DIR false
+//#define INVERT_E3_DIR false
+//#define INVERT_E4_DIR false
 //#define INVERT_E5_DIR false
 //#define INVERT_E6_DIR false
 //#define INVERT_E7_DIR false
@@ -1505,12 +1505,12 @@
 #define Z_SAFE_HOMING     // Not active in flying bear config
 
 #if ENABLED(Z_SAFE_HOMING)
-#define Z_SAFE_HOMING_X_POINT 0 // X point for Z homing
+#define Z_SAFE_HOMING_X_POINT 1 // X point for Z homing
 #define Z_SAFE_HOMING_Y_POINT 0 // Y point for Z homing
 #endif
 
 // Homing speeds (mm/min)
-#define HOMING_FEEDRATE_MM_M { (50*60), (50*60), (8*60) }
+#define HOMING_FEEDRATE_MM_M { (50*60), (50*60), (2*60) }
 
 // Validate that endstops are triggered on homing moves
 //#define VALIDATE_HOMING_ENDSTOPS
